@@ -185,6 +185,7 @@ public class WindowsSensors implements Sensors {
      */
     @Override
     public int[] getFanSpeeds() {
+        
         // Attempt to fetch value from Open Hardware Monitor if it is running
         WmiResult<OhmHardwareProperty> ohmHardware = WmiUtil.queryWMI(OHM_HARDWARE_QUERY);
         if (ohmHardware.getResultCount() > 0) {
@@ -201,22 +202,25 @@ public class WindowsSensors implements Sensors {
                     for (int i = 0; i < ohmSensors.getResultCount(); i++) {
                         fanSpeeds[i] = (int) WmiUtil.getFloat(ohmSensors, OhmSensorProperty.VALUE, i);
                     }
+                    
                     return fanSpeeds;
                 }
             }
         }
-
+        
         // If we get this far, OHM is not running.
         // Try to get from conventional WMI
         WmiResult<FanProperty> fan = WmiUtil.queryWMI(FAN_QUERY);
         if (fan.getResultCount() > 1) {
             int[] fanSpeeds = new int[fan.getResultCount()];
             for (int i = 0; i < fan.getResultCount(); i++) {
-                fanSpeeds[i] = WmiUtil.getUint32(fan, FanProperty.DESIREDSPEED, i);
+                //fanSpeeds[i] = WmiUtil.getUint32(fan, FanProperty.DESIREDSPEED, i);
+                fanSpeeds[i] = (int) WmiUtil.getUint64(fan, FanProperty.DESIREDSPEED, i);
             }
             return fanSpeeds;
         }
         // Default
+        
         return new int[1];
     }
 
